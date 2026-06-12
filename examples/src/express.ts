@@ -1,5 +1,5 @@
 import express from "express";
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 const app = express();
 const PORT = 3000;

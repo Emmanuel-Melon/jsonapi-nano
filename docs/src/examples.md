@@ -13,7 +13,7 @@ This page demonstrates common integration patterns with popular frameworks.
 
 ```ts
 import express from "express";
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 const app = express();
 
@@ -34,7 +34,7 @@ app.get("/articles/:id", (req, res) => {
 
 ```ts
 import Fastify from "fastify";
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 const app = Fastify();
 

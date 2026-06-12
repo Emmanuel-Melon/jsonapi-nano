@@ -14,7 +14,7 @@ It transforms your application data into consistent JSON:API resource and error 
 ## Installation
 
 ```bash
-npm install @eman/jsonapi-nano
+npm install @emelon/jsonapi-nano
 ```
 
 ## Defining a Resource
@@ -22,7 +22,7 @@ npm install @eman/jsonapi-nano
 Resources describe how your data should be presented.
 
 ```typescript
-import { createResource } from "@eman/jsonapi-nano";
+import { createResource } from "@emelon/jsonapi-nano";
 
 interface Article {
   id: string;
@@ -42,7 +42,7 @@ const articleResource = createResource<Article>("articles", {
 ## Serializing a Single Resource
 
 ```typescript
-import { serialize } from "@eman/jsonapi-nano";
+import { serialize } from "@emelon/jsonapi-nano";
 
 const article = {
   id: "art_100",

@@ -13,6 +13,7 @@
   "license": "ISC",
   "dependencies": {
     "@eman/jsonapi-nano": "file:.yalc/@eman/jsonapi-nano",
+    "@emelon/jsonapi-nano": "file:.yalc/@emelon/jsonapi-nano",
     "express": "^5.2.1"
   },
   "devDependencies": {

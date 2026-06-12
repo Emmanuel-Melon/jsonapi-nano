@@ -36,7 +36,7 @@ createResource<T, Context = unknown>(
 ### Example
 
 ```ts
-import { createResource } from "@eman/jsonapi-nano";
+import { createResource } from "@emelon/jsonapi-nano";
 
 type Article = { id: string; title: string; body: string; authorId: string };
 
@@ -82,7 +82,7 @@ serialize<T extends { id: string | number }, Context = unknown>(
 ### Example
 
 ```ts
-import { serialize } from "@eman/jsonapi-nano";
+import { serialize } from "@emelon/jsonapi-nano";
 
 const article = {
   id: "1",
@@ -119,7 +119,7 @@ Output:
 
 ```ts
 import express from "express";
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 type Article = { id: string; title: string };
 
@@ -154,7 +154,7 @@ serializeErrors(errors: ErrorConfig | ErrorConfig[]): { errors: SerializedError[
 ### Example
 
 ```ts
-import { serializeErrors } from "@eman/jsonapi-nano";
+import { serializeErrors } from "@emelon/jsonapi-nano";
 
 const errorResponse = serializeErrors({
   status: 422,

@@ -11,11 +11,11 @@ Zero dependencies, framework agnostic.
 ## Quick start
 
 ```bash
-npm install @eman/jsonapi-nano
+npm install @emelon/jsonapi-nano
 ```
 
 ```ts
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 const articleResource = createResource("articles", {
   attributes: (article) => ({ title: article.title, body: article.body }),
@@ -46,7 +46,7 @@ const output = serialize(article, articleResource);
 ## Links
 
 - [GitHub repository](https://github.com/Emmanuel-Melon/jsonapi-nano)
-- [npm package](https://www.npmjs.com/package/@eman/jsonapi-nano)
+- [npm package](https://www.npmjs.com/package/@emelon/jsonapi-nano)
 - [JSON:API specification](https://jsonapi.org/)
 
 ## License

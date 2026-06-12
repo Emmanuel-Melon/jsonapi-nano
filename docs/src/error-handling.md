@@ -35,7 +35,7 @@ An object describing a single error.
 #### Single error
 
 ```ts
-import { serializeErrors } from "@eman/jsonapi-nano";
+import { serializeErrors } from "@emelon/jsonapi-nano";
 
 const errorResponse = serializeErrors({
   status: 404,
