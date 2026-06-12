@@ -1,2 +1,2 @@
 export * from "./core";
-export type { ResourceConfig, SerializeOptions } from "./types";
+export type { ErrorConfig, ResourceConfig, SerializeOptions } from "./types";

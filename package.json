@@ -34,7 +34,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/egatwech/jsonapi-nano"
+    "url": "https://github.com/Emmanuel-Melon/jsonapi-nano"
   },
   "engines": {
     "node": ">=18"

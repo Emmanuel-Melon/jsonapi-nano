@@ -1,54 +1,61 @@
-import type { ResourceConfig, SerializeOptions } from "./types";
+import type { ErrorConfig, ResourceConfig, SerializeOptions } from "./types";
 
-export function createResource<T>(
+export function createResource<T, Context = unknown>(
   type: string,
-  config?: Omit<ResourceConfig<T>, "type">
-) {
+  config?: Omit<ResourceConfig<T, Context>, "type">,
+): {
+  type: string;
+  attributes: (item: T, ctx: Context | undefined) => Record<string, unknown>;
+  meta?: (item: T, ctx: Context | undefined) => Record<string, unknown>;
+  links?: (
+    item: T,
+    ctx: Context | undefined,
+  ) => Record<string, string | undefined>;
+} {
   return {
     type,
-    attributes: config?.attributes ?? ((item: T) => item as Record<string, unknown>),
+    attributes:
+      config?.attributes ??
+      ((item: T) => {
+        const copy = { ...item } as Record<string, unknown>;
+        delete copy.id;
+        return copy;
+      }),
     meta: config?.meta,
     links: config?.links,
   };
 }
 
-export function serialize<T extends { id: string | number }>(
+export function serialize<T extends { id: string | number }, Context = unknown>(
   data: T | T[],
-  resource: ReturnType<typeof createResource<T>>,
-  options?: SerializeOptions
+  resource: ReturnType<typeof createResource<T, Context>>,
+  options?: SerializeOptions<Context>,
 ) {
   const isCollection = Array.isArray(data);
-  
+  const context = options?.context;
+
   const formatSingle = (item: T) => ({
     type: resource.type,
     id: String(item.id),
-    attributes: resource.attributes(item),
-    ...(resource.meta && { meta: resource.meta(item) }),
-    ...(resource.links && { links: resource.links(item, options?.context) }),
+    attributes: resource.attributes(item, context),
+    ...(resource.meta && { meta: resource.meta(item, context) }),
+    ...(resource.links && { links: resource.links(item, context) }),
   });
 
   return {
-    data: isCollection ? data.map(formatSingle) : formatSingle(data),
+    data: isCollection
+      ? (data as T[]).map(formatSingle)
+      : formatSingle(data as T),
     ...(options?.links && { links: options.links }),
-    metadata: {
+    meta: {
       timestamp: new Date().toISOString(),
       ...options?.meta,
     },
   };
 }
 
-export interface ErrorConfig {
-  status: number;
-  title?: string;
-  detail?: string;
-  code?: string;
-  source?: { pointer?: string; method?: string };
-  meta?: Record<string, unknown>;
-}
-
 export function serializeErrors(errors: ErrorConfig | ErrorConfig[]) {
   const errorArray = Array.isArray(errors) ? errors : [errors];
-  
   return {
     errors: errorArray.map((err) => ({
       status: String(err.status),
