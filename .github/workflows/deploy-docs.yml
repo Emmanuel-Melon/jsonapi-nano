@@ -39,7 +39,7 @@ jobs:
       - name: Build 11ty Site
         run: |
           cd docs
-          npx @11ty/eleventy --pathprefix="/jsonapi-nano-docs/"
+          npx @11ty/eleventy --pathprefix="/jsonapi-nano"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

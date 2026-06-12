@@ -4,7 +4,9 @@ module.exports = function (eleventyConfig) {
   });
 
   return {
-    pathPrefix: "/jsonapi-nano-docs/",
+    pathPrefix: "/jsonapi-nano", 
+    markdownTemplateEngine: "njk",
+    htmlTemplateEngine: "njk",
     dir: {
       input: "src",
       includes: "_includes",
