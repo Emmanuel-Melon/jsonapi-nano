@@ -1,0 +1,42 @@
+{
+  "name": "@eman/jsonapi-nano",
+  "version": "0.1.0",
+  "description": "A lightweight, zero-dependency JSON:API presenter engine for TypeScript.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepublishOnly": "npm run build",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "prettier": "^3.8.4",
+    "typescript": "^5.0.0"
+  },
+  "keywords": [
+    "json-api",
+    "jsonapi",
+    "serializer",
+    "typescript"
+  ],
+  "author": "Emmanuel Gatwech",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/egatwech/jsonapi-nano"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
