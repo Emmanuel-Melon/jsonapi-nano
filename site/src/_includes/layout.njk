@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>{{ title or "jsonapi-nano" }}</title>
+  <link rel="stylesheet" href="/styles/main.css">
+</head>
+<body>
+
+  {% include "nav.njk" %}
+
+  <main>
+    {{ content | safe }}
+  </main>
+<footer>
+  <p>
+    © {{ year or "2026" }} Emmanuel Gatwech – 
+    <a href="https://github.com/Emmanuel-Melon/jsonapi-nano">jsonapi-nano</a> is 
+    <a href="https://opensource.org/licenses/MIT">MIT licensed</a>
+  </p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,21 @@
+body {
+  max-width: 900px;
+  margin: auto;
+  padding: 2rem;
+  font-family: system-ui, sans-serif;
+  line-height: 1.6;
+}
+
+nav {
+  margin-bottom: 2rem;
+}
+
+nav a {
+  margin-right: 1rem;
+}
+
+pre {
+  overflow-x: auto;
+  padding: 1rem;
+  background: #f4f4f4;
+}
