@@ -15,8 +15,9 @@ Our full installation guides, framework integration examples, type parameters, a
 
 ## Installation
 
-````bash
+```bash
 npm install @eman/jsonapi-nano
+```
 
 ## Quick Start
 
@@ -41,7 +42,7 @@ const articleResource = createResource<Article>("articles", {
 // 2. Format data into strict JSON:API specifications
 const article = { id: "art_100", title: "Hello World", body: "This is a test article", authorId: "auth_1" };
 const output = serialize(article, articleResource);
-````
+```
 
 **Output Target Shape:**
 
