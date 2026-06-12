@@ -40,7 +40,12 @@ const articleResource = createResource<Article>("articles", {
 });
 
 // 2. Format data into strict JSON:API specifications
-const article = { id: "art_100", title: "Hello World", body: "This is a test article", authorId: "auth_1" };
+const article = {
+  id: "art_100",
+  title: "Hello World",
+  body: "This is a test article",
+  authorId: "auth_1",
+};
 const output = serialize(article, articleResource);
 ```
 
