@@ -1,5 +1,5 @@
 {
-  "name": "@eman/jsonapi-nano",
+  "name": "@emelon/jsonapi-nano",
   "version": "0.1.0",
   "description": "A lightweight, zero-dependency JSON:API presenter engine for TypeScript.",
   "main": "dist/index.js",

@@ -3,8 +3,8 @@
 A lightweight, ultra-fast, zero-dependency presentation layer engine for formatting data into strict, compliance-ready [JSON:API](https://jsonapi.org/) spec configurations. 100% framework-agnostic design built for modern cloud-native architectures.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-![NPM Version](https://img.shields.io/npm/v/@eman/jsonapi-nano)
-![Bundle Size](https://img.shields.io/bundlephobia/min/@eman/jsonapi-nano)
+![NPM Version](https://img.shields.io/npm/v/@emelon/jsonapi-nano)
+![Bundle Size](https://img.shields.io/bundlephobia/min/@emelon/jsonapi-nano)
 
 ## 📖 Complete Documentation
 
@@ -16,13 +16,13 @@ Our full installation guides, framework integration examples, type parameters, a
 ## Installation
 
 ```bash
-npm install @eman/jsonapi-nano
+npm install @emelon/jsonapi-nano
 ```
 
 ## Quick Start
 
 ```typescript
-import { createResource, serialize } from "@eman/jsonapi-nano";
+import { createResource, serialize } from "@emelon/jsonapi-nano";
 
 interface Article {
   id: string;
