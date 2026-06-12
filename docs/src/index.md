@@ -17,12 +17,16 @@ npm install @eman/jsonapi-nano
 ```ts
 import { createResource, serialize } from "@eman/jsonapi-nano";
 
-const userResource = createResource("users", {
-  attributes: (user) => ({ name: user.name, email: user.email }),
+const articleResource = createResource("articles", {
+  attributes: (article) => ({ title: article.title, body: article.body }),
 });
 
-const user = { id: "1", name: "Alice", email: "alice@example.com" };
-const output = serialize(user, userResource);
+const article = {
+  id: "1",
+  title: "Hello World",
+  body: "This is a test article",
+};
+const output = serialize(article, articleResource);
 ```
 
 ## Why jsonapi-nano?

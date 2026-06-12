@@ -19,22 +19,22 @@ npm install @eman/jsonapi-nano
 
 ## Defining a Resource
 
-Resources describe how your entities should be presented.
+Resources describe how your data should be presented.
 
 ```typescript
 import { createResource } from "@eman/jsonapi-nano";
 
-interface User {
+interface Article {
   id: string;
-  name: string;
-  email: string;
-  role: string;
+  title: string;
+  body: string;
+  authorId: string;
 }
 
-const userResource = createResource<User>("users", {
-  attributes: (user) => ({
-    name: user.name,
-    email: user.email,
+const articleResource = createResource<Article>("articles", {
+  attributes: (article) => ({
+    title: article.title,
+    body: article.body,
   }),
 });
 ```
@@ -44,14 +44,14 @@ const userResource = createResource<User>("users", {
 ```typescript
 import { serialize } from "@eman/jsonapi-nano";
 
-const user = {
-  id: "usr_100",
-  name: "Emmanuel",
-  email: "emmanuel@example.com",
-  role: "admin",
+const article = {
+  id: "art_100",
+  title: "Hello World",
+  body: "This is a test article",
+  authorId: "auth_1",
 };
 
-const response = serialize(user, userResource);
+const response = serialize(article, articleResource);
 ```
 
 ### Output
@@ -59,11 +59,11 @@ const response = serialize(user, userResource);
 ```json
 {
   "data": {
-    "type": "users",
-    "id": "usr_100",
+    "type": "articles",
+    "id": "art_100",
     "attributes": {
-      "name": "Emmanuel",
-      "email": "emmanuel@example.com"
+      "title": "Hello World",
+      "body": "This is a test article"
     }
   },
   "meta": {
@@ -75,20 +75,22 @@ const response = serialize(user, userResource);
 ## Serializing a Collection
 
 ```typescript
-const users = [
+const articles = [
   {
-    id: "usr_100",
-    name: "Emmanuel",
-    email: "emmanuel@example.com",
+    id: "art_100",
+    title: "Hello World",
+    body: "This is a test article",
+    authorId: "auth_1",
   },
   {
-    id: "usr_101",
-    name: "Alice",
-    email: "alice@example.com",
+    id: "art_101",
+    title: "Another Article",
+    body: "This is another test article",
+    authorId: "auth_2",
   },
 ];
 
-const response = serialize(users, userResource);
+const response = serialize(articles, articleResource);
 ```
 
 ### Output
@@ -97,19 +99,19 @@ const response = serialize(users, userResource);
 {
   "data": [
     {
-      "type": "users",
-      "id": "usr_100",
+      "type": "articles",
+      "id": "art_100",
       "attributes": {
-        "name": "Emmanuel",
-        "email": "emmanuel@example.com"
+        "title": "Hello World",
+        "body": "This is a test article"
       }
     },
     {
-      "type": "users",
-      "id": "usr_101",
+      "type": "articles",
+      "id": "art_101",
       "attributes": {
-        "name": "Alice",
-        "email": "alice@example.com"
+        "title": "Another Article",
+        "body": "This is another test article"
       }
     }
   ]
@@ -118,5 +120,5 @@ const response = serialize(users, userResource);
 
 ## Next Steps
 
-Learn every available API in the [API Reference](/api-reference) section.  
-Explore real-world framework integrations in the [Examples](/examples) section.
+- Learn every available API in the [API Reference](/api-reference) section.
+- Explore real-world framework integrations in the [Examples](/examples) section.

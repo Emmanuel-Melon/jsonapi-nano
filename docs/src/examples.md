@@ -17,16 +17,16 @@ import { createResource, serialize } from "@eman/jsonapi-nano";
 
 const app = express();
 
-const userResource = createResource("users");
+const articleResource = createResource("articles");
 
-app.get("/users/:id", (req, res) => {
-  const user = {
+app.get("/articles/:id", (req, res) => {
+  const article = {
     id: req.params.id,
-    name: "Emmanuel",
-    email: "emmanuel@example.com",
+    title: "Hello World",
+    body: "This is a test article",
   };
 
-  res.json(serialize(user, userResource));
+  res.json(serialize(article, articleResource));
 });
 ```
 
@@ -38,49 +38,35 @@ import { createResource, serialize } from "@eman/jsonapi-nano";
 
 const app = Fastify();
 
-const userResource = createResource("users");
+const articleResource = createResource("articles");
 
-app.get("/users/:id", async (request) => {
-  const user = {
+app.get("/articles/:id", async (request) => {
+  const article = {
     id: request.params.id,
-    name: "Emmanuel",
+    title: "Hello World",
+    body: "This is a test article",
   };
 
-  return serialize(user, userResource);
+  return serialize(article, articleResource);
 });
 ```
 
-NestJS
+# NestJS
 
 ```typescript
-@Controller("users")
-export class UsersController {
+@Controller("articles")
+export class ArticlesController {
   @Get(":id")
   findOne(@Param("id") id: string) {
-    const user = {
+    const article = {
       id,
-      name: "Emmanuel",
+      title: "Hello World",
+      body: "This is a test article",
     };
 
-    return serialize(user, userResource);
+    return serialize(article, articleResource);
   }
 }
 ```
 
-AWS Lambda
-
-```typescript
-import { serialize } from "@eman/jsonapi-nano";
-
-export const handler = async () => {
-  const user = {
-    id: "usr_100",
-    name: "Emmanuel",
-  };
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(serialize(user, userResource)),
-  };
-};
-```
+> See the [Examples](https://github.com/Emmanuel-Melon/jsonapi-nano/tree/main/examples) for more examples.

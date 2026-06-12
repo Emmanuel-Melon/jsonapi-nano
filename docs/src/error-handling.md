@@ -40,7 +40,7 @@ import { serializeErrors } from "@eman/jsonapi-nano";
 const errorResponse = serializeErrors({
   status: 404,
   title: "Resource not found",
-  detail: `User with id "abc" does not exist`,
+  detail: `Article with id "abc" does not exist`,
 });
 ```
 
@@ -52,7 +52,7 @@ Output:
     {
       "status": "404",
       "title": "Resource not found",
-      "detail": "User with id \"abc\" does not exist"
+      "detail": "Article with id \"abc\" does not exist"
     }
   ]
 }
@@ -65,14 +65,14 @@ serializeErrors([
   {
     status: 422,
     title: "Invalid attribute",
-    source: { pointer: "/data/attributes/email" },
-    detail: "Must be a valid email address",
+    source: { pointer: "/data/attributes/title" },
+    detail: "Title is required",
   },
   {
     status: 422,
     title: "Missing attribute",
-    source: { pointer: "/data/attributes/name" },
-    detail: "This field is required",
+    source: { pointer: "/data/attributes/body" },
+    detail: "Body is required",
   },
 ]);
 ```
@@ -85,14 +85,14 @@ Output:
     {
       "status": "422",
       "title": "Invalid attribute",
-      "source": { "pointer": "/data/attributes/email" },
-      "detail": "Must be a valid email address"
+      "source": { "pointer": "/data/attributes/title" },
+      "detail": "Title is required"
     },
     {
       "status": "422",
       "title": "Missing attribute",
-      "source": { "pointer": "/data/attributes/name" },
-      "detail": "This field is required"
+      "source": { "pointer": "/data/attributes/body" },
+      "detail": "Body is required"
     }
   ]
 }

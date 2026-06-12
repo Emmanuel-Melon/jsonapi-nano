@@ -38,12 +38,12 @@ createResource<T, Context = unknown>(
 ```ts
 import { createResource } from "@eman/jsonapi-nano";
 
-type User = { id: string; name: string; email: string; role: string };
+type Article = { id: string; title: string; body: string; authorId: string };
 
-const userResource = createResource<User>("users", {
-  attributes: (user) => ({ name: user.name, email: user.email }),
-  meta: (user) => ({ role: user.role }),
-  links: (user) => ({ self: `/users/${user.id}` }),
+const articleResource = createResource<Article>("articles", {
+  attributes: (article) => ({ title: article.title, body: article.body }),
+  meta: (article) => ({ authorId: article.authorId }),
+  links: (article) => ({ self: `/articles/${article.id}` }),
 });
 ```
 
@@ -84,13 +84,13 @@ serialize<T extends { id: string | number }, Context = unknown>(
 ```ts
 import { serialize } from "@eman/jsonapi-nano";
 
-const user = {
+const article = {
   id: "1",
-  name: "Emmanuel",
-  email: "emmanuel@example.com",
-  role: "admin",
+  title: "Hello World",
+  body: "This is a test article",
+  authorId: "auth_1",
 };
-const output = serialize(user, userResource);
+const output = serialize(article, articleResource);
 
 console.log(output);
 ```
@@ -100,14 +100,14 @@ Output:
 ```json
 {
   "data": {
-    "type": "users",
+    "type": "articles",
     "id": "1",
     "attributes": {
-      "name": "Emmanuel",
-      "email": "emmanuel@example.com"
+      "title": "Hello World",
+      "body": "This is a test article"
     },
-    "meta": { "role": "admin" },
-    "links": { "self": "/users/1" }
+    "meta": { "authorId": "auth_1" },
+    "links": { "self": "/articles/1" }
   },
   "meta": {
     "timestamp": "2026-06-12T10:30:00.000Z"
@@ -118,17 +118,24 @@ Output:
 ### Using `context`
 
 ```ts
-const resourceWithDynamicLinks = createResource<User, { req: Request }>(
-  "users",
+import express from "express";
+import { createResource, serialize } from "@eman/jsonapi-nano";
+
+type Article = { id: string; title: string };
+
+const resourceWithDynamicLinks = createResource<Article, express.Request>(
+  "articles",
   {
-    links: (user, ctx) => ({
-      self: `${ctx?.req.protocol}://${ctx?.req.get("host")}/users/${user.id}`,
+    links: (article, req) => ({
+      self: req
+        ? `${req.protocol}://${req.get("host")}/articles/${article.id}`
+        : undefined,
     }),
   },
 );
 
-serialize(user, resourceWithDynamicLinks, {
-  context: { req },
+serialize(article, resourceWithDynamicLinks, {
+  context: req,
 });
 ```
 
@@ -144,17 +151,6 @@ Converts one or more error definitions into a JSON:API `errors` array.
 serializeErrors(errors: ErrorConfig | ErrorConfig[]): { errors: SerializedError[] }
 ```
 
-### ErrorConfig fields
-
-| Field    | Type                                       | Description                             |
-| -------- | ------------------------------------------ | --------------------------------------- |
-| `status` | `number \| string`                         | HTTP status code (stringified)          |
-| `title`  | `string`                                   | Short summary (defaults to `"Error"`)   |
-| `detail` | `string`                                   | Explanation specific to this occurrence |
-| `code`   | `string`                                   | Application‑specific error code         |
-| `source` | `{ pointer?: string; parameter?: string }` | Pointer to request part                 |
-| `meta`   | `Record<string, unknown>`                  | Additional metadata                     |
-
 ### Example
 
 ```ts
@@ -163,8 +159,8 @@ import { serializeErrors } from "@eman/jsonapi-nano";
 const errorResponse = serializeErrors({
   status: 422,
   title: "Validation failed",
-  source: { pointer: "/data/attributes/email" },
-  detail: "Must be a valid email address",
+  source: { pointer: "/data/attributes/title" },
+  detail: "Title is required",
 });
 ```
 
@@ -176,28 +172,11 @@ Output:
     {
       "status": "422",
       "title": "Validation failed",
-      "source": { "pointer": "/data/attributes/email" },
-      "detail": "Must be a valid email address"
+      "source": { "pointer": "/data/attributes/title" },
+      "detail": "Title is required"
     }
   ]
 }
 ```
 
 > See the [Error Handling](/error-handling/) page for more examples and Express middleware integration.
-
-````
-
----
-
-## Updated navigation (`nav.njk`) with repo link
-
-```html
-<nav>
-  <a href="/">Home</a>
-  <a href="/getting-started/">Getting Started</a>
-  <a href="/api-reference/">API Reference</a>
-  <a href="/examples/">Examples</a>
-  <a href="/error-handling/">Error Handling</a>
-  <a href="https://github.com/egatwech/jsonapi-nano" target="_blank" rel="noopener">GitHub</a>
-</nav>
-````
