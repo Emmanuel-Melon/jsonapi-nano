@@ -7,7 +7,7 @@ title: API Reference
 
 ## createResource
 
-Creates a reusable resource serializer.
+Creates a reusable, typesafe resource serializer definition.
 
 ### Signature
 
@@ -20,30 +20,53 @@ createResource<T, Context = unknown>(
 
 ### Parameters
 
-| Parameter | Type     | Description                                  |
-| --------- | -------- | -------------------------------------------- |
-| `type`    | `string` | The JSON:API resource type (e.g., `"users"`) |
-| `config`  | `object` | Optional configuration (see below)           |
+| Parameter | Type     | Description                                                             |
+| --------- | -------- | ----------------------------------------------------------------------- |
+| `type`    | `string` | The JSON:API resource type designation (e.g., `"articles"`, `"users"`). |
+| `config`  | `object` | Optional lifecycle mappings configuration.                              |
 
-### Config options
+### Config Options
 
-| Option       | Type                                                              | Description                                                    |
-| ------------ | ----------------------------------------------------------------- | -------------------------------------------------------------- |
-| `attributes` | `(item: T, ctx?: Context) => Record<string, unknown>`             | Maps entity to attributes. Default: all properties except `id` |
-| `meta`       | `(item: T, ctx?: Context) => Record<string, unknown>`             | Adds per‑resource metadata                                     |
-| `links`      | `(item: T, ctx?: Context) => Record<string, string \| undefined>` | Adds per‑resource links                                        |
+| Option          | Type                                                             | Description                                                                                                     |
+| --------------- | ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `attributes`    | `(item: T, ctx?: Context) => Record<string, unknown>`            | Maps incoming entities to their JSON:API attributes object block. _Default: Copies all properties except `id`._ |
+| `relationships` | `(item: T, ctx?: Context) => Record<string, RelationshipObject>` | Defines linkages to other resources. Use semantic helpers like `belongsTo`.                                     |
+| `meta`          | `(item: T, ctx?: Context) => Record<string, unknown>`            | Evaluates per-resource isolated metadata.                                                                       |
+| `links`         | `(item: T, ctx?: Context) => Record<string, string               | undefined>`                                                                                                     | Evaluates per-resource document links. |
 
-### Example
+### Example with Relationships
 
 ```ts
-import { createResource } from "@emelon/jsonapi-nano";
+import { createResource, belongsTo } from "@emelon/jsonapi-nano";
 
 type Article = { id: string; title: string; body: string; authorId: string };
 
 const articleResource = createResource<Article>("articles", {
-  attributes: (article) => ({ title: article.title, body: article.body }),
-  meta: (article) => ({ authorId: article.authorId }),
-  links: (article) => ({ self: `/articles/${article.id}` }),
+  attributes: (a) => ({ title: a.title, body: a.body }),
+  relationships: (a) => ({
+    author: belongsTo("authors", a.authorId),
+  }),
+  links: (a) => ({ self: `/articles/${a.id}` }),
+});
+```
+
+---
+
+## belongsTo
+
+A shorthand semantics helper for creating standard JSON:API structural relationship pointers.
+
+### Signature
+
+```ts
+belongsTo(type: string, id: string | number): { data: { type: string; id: string } }
+```
+
+### Example
+
+```ts
+relationships: (article) => ({
+  author: belongsTo("authors", article.authorId),
 });
 ```
 
@@ -51,7 +74,7 @@ const articleResource = createResource<Article>("articles", {
 
 ## serialize
 
-Transforms one or more entities into a JSON:API resource document.
+Transforms raw entities or collections into strict, compliance-ready JSON:API documents.
 
 ### Signature
 
@@ -63,79 +86,62 @@ serialize<T extends { id: string | number }, Context = unknown>(
 )
 ```
 
-### Parameters
+### Options Block Configuration
 
-| Parameter  | Type               | Description                                  |
-| ---------- | ------------------ | -------------------------------------------- |
-| `data`     | `T \| T[]`         | Single entity or array (each must have `id`) |
-| `resource` | `ReturnType<...>`  | The resource object from `createResource`    |
-| `options`  | `SerializeOptions` | Optional top‑level configuration             |
+| Option      | Type                                         | Description                                                                                                                |
+| ----------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | -------------------------------- |
+| `context`   | `Context`                                    | Execution-specific runtime context passed down directly to all configuration functions.                                    |
+| `include`   | `Record<string, [Array<any>, ResourceLike]>` | Maps defined relationships to secondary datasets and resource configurations to automatically generate compound documents. |
+| `fields`    | `Record<string, string[]>`                   | An object mapping resource types to an array of properties to keep, enforcing sparse fieldsets.                            |
+| `links`     | `Record<string, string                       | undefined>`                                                                                                                | Top-level global document links. |
+| `meta`      | `Record<string, unknown>`                    | Top-level global document metadata (merged alongside automated runtime tracking flags).                                    |
+| `timestamp` | `boolean`                                    | Set to `false` to opt-out of the automatic `meta.timestamp` insertion block. _Default: `true`._                            |
+| `jsonapi`   | `{ version: string }`                        | Optional top-level member indicating JSON:API spec version details.                                                        |
 
-### Options
+### Example with Compound Inclusions & Sparse Fieldsets
 
-| Option    | Type                                  | Description                                     |
-| --------- | ------------------------------------- | ----------------------------------------------- |
-| `context` | `Context`                             | Passed to `attributes`/`meta`/`links` functions |
-| `meta`    | `Record<string, unknown>`             | Top‑level metadata (merged with `timestamp`)    |
-| `links`   | `Record<string, string \| undefined>` | Top‑level links object                          |
+```ts
+import { serialize } from "@emelon/jsonapi-nano";
+import { fieldsFromQuery } from "@emelon/jsonapi-nano/query";
+
+const output = serialize(mockArticles, articleResource, {
+  context: req,
+  links: { self: "[https://api.com/articles](https://api.com/articles)" },
+  include: {
+    author: [mockAuthors, authorResource], // Side-loads author documents matching the relationship linkage
+  },
+  fields: {
+    articles: ["title"], // Only serializes the "title" attribute down the wire
+  },
+});
+```
+
+---
+
+## fieldsFromQuery (`/query` subpath)
+
+An isolated framework-agnostic request query parser module designed to format incoming application states directly into engine-compatible sparse fieldset parameter maps.
+
+### Signature
+
+```ts
+fieldsFromQuery(query: Record<string, unknown>): Record<string, string[]> | undefined
+```
 
 ### Example
 
 ```ts
-import { serialize } from "@emelon/jsonapi-nano";
-
-const article = {
-  id: "1",
-  title: "Hello World",
-  body: "This is a test article",
-  authorId: "auth_1",
-};
-const output = serialize(article, articleResource);
-
-console.log(output);
-```
-
-Output:
-
-```json
-{
-  "data": {
-    "type": "articles",
-    "id": "1",
-    "attributes": {
-      "title": "Hello World",
-      "body": "This is a test article"
-    },
-    "meta": { "authorId": "auth_1" },
-    "links": { "self": "/articles/1" }
-  },
-  "meta": {
-    "timestamp": "2026-06-12T10:30:00.000Z"
-  }
-}
-```
-
-### Using `context`
-
-```ts
 import express from "express";
-import { createResource, serialize } from "@emelon/jsonapi-nano";
+import { fieldsFromQuery } from "@emelon/jsonapi-nano/query";
 
-type Article = { id: string; title: string };
+const app = express();
 
-const resourceWithDynamicLinks = createResource<Article, express.Request>(
-  "articles",
-  {
-    links: (article, req) => ({
-      self: req
-        ? `${req.protocol}://${req.get("host")}/articles/${article.id}`
-        : undefined,
-    }),
-  },
-);
+app.get("/articles", (req, res) => {
+  // Parses ?fields[articles]=title,body into { articles: ["title", "body"] }
+  const fields = fieldsFromQuery(req.query);
 
-serialize(article, resourceWithDynamicLinks, {
-  context: req,
+  const payload = serialize(data, resource, { fields });
+  res.json(payload);
 });
 ```
 
@@ -143,7 +149,7 @@ serialize(article, resourceWithDynamicLinks, {
 
 ## serializeErrors
 
-Converts one or more error definitions into a JSON:API `errors` array.
+Converts single or multi-record error arrays into standard compliant JSON:API `errors` array documents.
 
 ### Signature
 
@@ -151,32 +157,4 @@ Converts one or more error definitions into a JSON:API `errors` array.
 serializeErrors(errors: ErrorConfig | ErrorConfig[]): { errors: SerializedError[] }
 ```
 
-### Example
-
-```ts
-import { serializeErrors } from "@emelon/jsonapi-nano";
-
-const errorResponse = serializeErrors({
-  status: 422,
-  title: "Validation failed",
-  source: { pointer: "/data/attributes/title" },
-  detail: "Title is required",
-});
-```
-
-Output:
-
-```json
-{
-  "errors": [
-    {
-      "status": "422",
-      "title": "Validation failed",
-      "source": { "pointer": "/data/attributes/title" },
-      "detail": "Title is required"
-    }
-  ]
-}
-```
-
-> See the [Error Handling](/error-handling/) page for more examples and Express middleware integration.
+> 📖 For an exhaustive breakdown of parameters, interfaces, and middleware wiring blueprints, visit the complete [Error Handling](https://www.google.com/search?q=/error-handling/) section.

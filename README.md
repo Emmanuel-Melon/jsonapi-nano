@@ -17,13 +17,18 @@ Our full installation guides, framework integration examples, type parameters, a
 
 ```bash
 npm install @emelon/jsonapi-nano
+
 ```
 
 ## Quick Start
 
 ```typescript
-import { createResource, serialize, belongsTo } from "@emelon/jsonapi-nano";
-import { fieldsFromQuery } from "@emelon/jsonapi-nano/query";
+import {
+  createResource,
+  serialize,
+  belongsTo,
+  fieldsFromQuery,
+} from "@emelon/jsonapi-nano";
 
 interface Article {
   id: string;
@@ -43,7 +48,7 @@ const authorResource = createResource<Author>("authors", {
 });
 
 const articleResource = createResource<Article>("articles", {
-  attributes: (article) => article,
+  attributes: (article) => ({ title: article.title, body: article.body }),
   relationships: (article) => ({
     author: belongsTo("authors", article.authorId),
   }),
@@ -53,12 +58,12 @@ const articleResource = createResource<Article>("articles", {
 const mockArticles = [
   {
     id: "1",
-    title: "Say Hello",
-    body: "A presentation engine.",
-    authorId: "99",
+    title: "The Will of Fire",
+    body: "Believing in your dreams no matter what.",
+    authorId: "7",
   },
 ];
-const mockAuthors = [{ id: "99", name: "Emmanuel Gatwech" }];
+const mockAuthors = [{ id: "7", name: "Naruto Uzumaki" }];
 
 const output = serialize(mockArticles, articleResource, {
   include: {
@@ -78,12 +83,12 @@ const output = serialize(mockArticles, articleResource, {
       "type": "articles",
       "id": "1",
       "attributes": {
-        "title": "Say Hello",
-        "body": "A presentation engine."
+        "title": "The Will of Fire",
+        "body": "Believing in your dreams no matter what."
       },
       "relationships": {
         "author": {
-          "data": { "type": "authors", "id": "99" }
+          "data": { "type": "authors", "id": "7" }
         }
       }
     }
@@ -91,9 +96,9 @@ const output = serialize(mockArticles, articleResource, {
   "included": [
     {
       "type": "authors",
-      "id": "99",
+      "id": "7",
       "attributes": {
-        "name": "Emmanuel Gatwech"
+        "name": "Naruto Uzumaki"
       }
     }
   ],
@@ -118,7 +123,7 @@ const output = serialize(mockArticles, articleResource, {
 | `included` (compound documents)                     | ✅ Implemented | Fully resolved and deduped by type+id via `options.include`       |
 | `jsonapi` top-level member                          | ✅ Implemented | Via `serialize` options                                           |
 | `errors` array                                      | ✅ Implemented | `serializeErrors`, includes `source.pointer`/`parameter`/`header` |
-| Sparse fieldsets (`fields[type]`)                   | ✅ Implemented | Fully supported via @emelon/jsonapi-nano/query filtering          |
+| Sparse fieldsets (`fields[type]`)                   | ✅ Implemented | Fully supported via query utility filtering                       |
 | Pagination links/meta helpers                       | 🚧 Planned     | Not yet supported                                                 |
 | Resource `type` validation                          | 🚧 Planned     | No runtime validation of member-name format                       |
 | Error object `id` / `links.about`                   | 🚧 Planned     | Not yet on `ErrorConfig`                                          |

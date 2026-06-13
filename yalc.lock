@@ -2,7 +2,7 @@
   "version": "v1",
   "packages": {
     "@emelon/jsonapi-nano": {
-      "signature": "79da4b5062c499c6ec407f0cde660dcb",
+      "signature": "426c3fce29fa68cd7b8f6b55d72710dd",
       "file": true
     }
   }
