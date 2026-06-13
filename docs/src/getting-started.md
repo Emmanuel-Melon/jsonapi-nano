@@ -22,7 +22,7 @@ npm install @emelon/jsonapi-nano
 Resources describe how your data should be presented.
 
 ```typescript
-import { createResource } from "@emelon/jsonapi-nano";
+import { createResource, belongsTo } from "@emelon/jsonapi-nano";
 
 interface Article {
   id: string;
@@ -31,91 +31,97 @@ interface Article {
   authorId: string;
 }
 
-const articleResource = createResource<Article>("articles", {
+interface Author {
+  id: string;
+  name: string;
+}
+
+export const authorResource = createResource<Author>("authors", {
+  attributes: (author) => ({ name: author.name }),
+});
+
+export const articleResource = createResource<Article>("articles", {
   attributes: (article) => ({
     title: article.title,
     body: article.body,
   }),
+  relationships: (article) => ({
+    author: belongsTo("authors", article.authorId),
+  }),
 });
 ```
 
-## Serializing a Single Resource
+### Compound Documents & Including Relations
+
+Pass related raw data records into your serialize execution configurations using the include map parameter. The serialization engine will match relation keys, build full JSON:API relationship definitions on your primary data records, and safely deduplicate elements inside your root included collection block automatically.
 
 ```typescript
 import { serialize } from "@emelon/jsonapi-nano";
 
-const article = {
-  id: "art_100",
-  title: "Hello World",
-  body: "This is a test article",
-  authorId: "auth_1",
-};
-
-const response = serialize(article, articleResource);
-```
-
-### Output
-
-```json
-{
-  "data": {
-    "type": "articles",
-    "id": "art_100",
-    "attributes": {
-      "title": "Hello World",
-      "body": "This is a test article"
-    }
-  },
-  "meta": {
-    "timestamp": "2026-06-12T13:08:00.000Z"
-  }
-}
-```
-
-## Serializing a Collection
-
-```typescript
-const articles = [
+const mockArticles = [
   {
-    id: "art_100",
-    title: "Hello World",
-    body: "This is a test article",
-    authorId: "auth_1",
-  },
-  {
-    id: "art_101",
-    title: "Another Article",
-    body: "This is another test article",
-    authorId: "auth_2",
+    id: "1",
+    title: "Say Hello",
+    body: "A presentation engine.",
+    authorId: "99",
   },
 ];
+const mockAuthors = [{ id: "99", name: "Naruto Uzumaki" }];
 
-const response = serialize(articles, articleResource);
+const response = serialize(mockArticles, articleResource, {
+  include: {
+    author: [mockAuthors, authorResource],
+  },
+});
 ```
 
-### Output
+**Output Target Shape:**
 
 ```json
 {
   "data": [
     {
       "type": "articles",
-      "id": "art_100",
+      "id": "1",
       "attributes": {
-        "title": "Hello World",
-        "body": "This is a test article"
-      }
-    },
-    {
-      "type": "articles",
-      "id": "art_101",
-      "attributes": {
-        "title": "Another Article",
-        "body": "This is another test article"
+        "title": "Say Hello",
+        "body": "A presentation engine."
+      },
+      "relationships": {
+        "author": {
+          "data": { "type": "authors", "id": "99" }
+        }
       }
     }
-  ]
+  ],
+  "included": [
+    {
+      "type": "authors",
+      "id": "99",
+      "attributes": {
+        "name": "Naruto Uzumaki"
+      }
+    }
+  ],
+  "meta": {
+    "timestamp": "2026-06-13T18:20:33.243Z"
+  }
 }
+```
+
+### Sparse Fieldsets
+
+To let clients request a lightweight network payload containing only explicit fields, use the built-in `fieldsFromQuery` parameter parser from the isolated `/query` subpath.
+
+```typescript
+import { serialize } from "@emelon/jsonapi-nano";
+import { fieldsFromQuery } from "@emelon/jsonapi-nano/query";
+
+// Automatically parses standard incoming HTTP formats (e.g. ?fields[articles]=title)
+// into valid serialization maps: { articles: ["title"] }
+const fields = fieldsFromQuery(req.query);
+
+const response = serialize(mockArticles, articleResource, { fields });
 ```
 
 ## Next Steps

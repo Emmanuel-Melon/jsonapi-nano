@@ -2,19 +2,24 @@
   "name": "jsonapi-nano-examples",
   "version": "1.0.0",
   "description": "Local end-to-end integration examples for jsonapi-nano",
-  "main": "dist/express.js",
+  "main": "dist/express/server.js",
   "type": "module",
   "scripts": {
     "build": "tsc",
-    "start": "tsc && node dist/express.js"
+    "start:express": "tsc && node dist/express/server.js",
+    "start:nestjs": "tsc && node dist/nestjs/main.js"
   },
   "keywords": [],
   "author": "Emmanuel Gatwech",
   "license": "ISC",
   "dependencies": {
-    "@eman/jsonapi-nano": "file:.yalc/@eman/jsonapi-nano",
     "@emelon/jsonapi-nano": "file:.yalc/@emelon/jsonapi-nano",
-    "express": "^5.2.1"
+    "@nestjs/common": "^10.0.0",
+    "@nestjs/core": "^10.0.0",
+    "@nestjs/platform-express": "^11.1.26",
+    "express": "^5.2.1",
+    "reflect-metadata": "^0.2.0",
+    "rxjs": "^7.8.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
