@@ -62,11 +62,32 @@ const output = serialize(article, articleResource);
     }
   },
   "meta": {
-    "timestamp": "2026-06-12T13:08:00.000Z",
-    "authorId": "auth_1"
+    "timestamp": "2026-06-12T13:08:00.000Z"
   }
 }
 ```
+
+---
+
+## Spec Compliance
+
+`jsonapi-nano` is **not** a tutorial on JSON:API — see [jsonapi.org](https://jsonapi.org/) for the full specification. Below is the current implementation status of `serialize` / `createResource` / `serializeErrors` against the spec.
+
+| Feature | Status | Notes |
+| --- | --- | --- |
+| `data` (resource objects, `type`/`id`/`attributes`) | ✅ Implemented | Core `createResource` + `serialize` |
+| `meta` (top-level and per-resource) | ✅ Implemented | Auto `timestamp` is opt-out via `options.timestamp: false` |
+| `links` (top-level and per-resource) | ✅ Implemented | |
+| `relationships` | ✅ Implemented | Via `createResource({ relationships })` |
+| `included` (compound documents) | ✅ Implemented | Deduped by `type`+`id` per spec |
+| `jsonapi` top-level member | ✅ Implemented | Via `serialize` options |
+| `errors` array | ✅ Implemented | `serializeErrors`, includes `source.pointer`/`parameter`/`header` |
+| Sparse fieldsets (`fields[type]`) | 🚧 Planned | Not yet supported |
+| Pagination links/meta helpers | 🚧 Planned | Not yet supported |
+| Resource `type` validation | 🚧 Planned | No runtime validation of member-name format |
+| Error object `id` / `links.about` | 🚧 Planned | Not yet on `ErrorConfig` |
+
+---
 
 ## License
 
