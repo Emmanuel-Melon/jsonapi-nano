@@ -4,6 +4,10 @@
     "@eman/jsonapi-nano": {
       "signature": "c3ecadf467450aff08d2b346bbc9dba8",
       "file": true
+    },
+    "@emelon/jsonapi-nano": {
+      "signature": "1008b74ee02ab45f0e6d67b6dffa0d96",
+      "file": true
     }
   }
 }
