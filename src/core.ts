@@ -1,17 +1,10 @@
-import type { ErrorConfig, ResourceConfig, SerializeOptions } from "./types";
+import type { ResourceConfig, SerializeOptions } from "./types";
+import { formatSingle, dedupeIncluded } from "./utils";
 
 export function createResource<T, Context = unknown>(
   type: string,
   config?: Omit<ResourceConfig<T, Context>, "type">,
-): {
-  type: string;
-  attributes: (item: T, ctx: Context | undefined) => Record<string, unknown>;
-  meta?: (item: T, ctx: Context | undefined) => Record<string, unknown>;
-  links?: (
-    item: T,
-    ctx: Context | undefined,
-  ) => Record<string, string | undefined>;
-} {
+) {
   return {
     type,
     attributes:
@@ -23,6 +16,7 @@ export function createResource<T, Context = unknown>(
       }),
     meta: config?.meta,
     links: config?.links,
+    relationships: config?.relationships,
   };
 }
 
@@ -34,36 +28,23 @@ export function serialize<T extends { id: string | number }, Context = unknown>(
   const isCollection = Array.isArray(data);
   const context = options?.context;
 
-  const formatSingle = (item: T) => ({
-    type: resource.type,
-    id: String(item.id),
-    attributes: resource.attributes(item, context),
-    ...(resource.meta && { meta: resource.meta(item, context) }),
-    ...(resource.links && { links: resource.links(item, context) }),
-  });
+  const included = options?.included
+    ? dedupeIncluded(options.included)
+    : undefined;
+
+  const includeTimestamp = options?.timestamp !== false;
+  const metaObj = {
+    ...(includeTimestamp && { timestamp: new Date().toISOString() }),
+    ...options?.meta,
+  };
 
   return {
     data: isCollection
-      ? (data as T[]).map(formatSingle)
-      : formatSingle(data as T),
+      ? (data as T[]).map((item) => formatSingle(item, resource, context))
+      : formatSingle(data as T, resource, context),
+    ...(included && { included }),
     ...(options?.links && { links: options.links }),
-    meta: {
-      timestamp: new Date().toISOString(),
-      ...options?.meta,
-    },
-  };
-}
-
-export function serializeErrors(errors: ErrorConfig | ErrorConfig[]) {
-  const errorArray = Array.isArray(errors) ? errors : [errors];
-  return {
-    errors: errorArray.map((err) => ({
-      status: String(err.status),
-      title: err.title ?? "Error",
-      ...(err.detail && { detail: err.detail }),
-      ...(err.code && { code: err.code }),
-      ...(err.source && { source: err.source }),
-      ...(err.meta && { meta: err.meta }),
-    })),
+    ...(options?.jsonapi && { jsonapi: options.jsonapi }),
+    ...(Object.keys(metaObj).length > 0 && { meta: metaObj }),
   };
 }
