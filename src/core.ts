@@ -1,5 +1,6 @@
 import type { ResourceConfig, SerializeOptions } from "./types";
-import { formatSingle, dedupeIncluded } from "./utils";
+import { formatSingle } from "./serializer";
+import { dedupeIncluded, resolveIncluded } from "./utils";
 
 export function createResource<T, Context = unknown>(
   type: string,
@@ -27,9 +28,21 @@ export function serialize<T extends { id: string | number }, Context = unknown>(
 ) {
   const isCollection = Array.isArray(data);
   const context = options?.context;
+  const fields = options?.fields;
 
-  const included = options?.included
-    ? dedupeIncluded(options.included)
+  const primaryData = isCollection
+    ? (data as T[]).map((item) => formatSingle(item, resource, context, fields))
+    : [formatSingle(data as T, resource, context, fields)];
+
+  const includedFromRelationships = options?.include
+    ? resolveIncluded(primaryData, options.include, context)
+    : [];
+
+  const includedExplicit = options?.included ?? [];
+
+  const allIncluded = [...includedFromRelationships, ...includedExplicit];
+  const included = allIncluded.length
+    ? dedupeIncluded(allIncluded, fields)
     : undefined;
 
   const includeTimestamp = options?.timestamp !== false;
@@ -39,9 +52,7 @@ export function serialize<T extends { id: string | number }, Context = unknown>(
   };
 
   return {
-    data: isCollection
-      ? (data as T[]).map((item) => formatSingle(item, resource, context))
-      : formatSingle(data as T, resource, context),
+    data: isCollection ? primaryData : primaryData[0],
     ...(included && { included }),
     ...(options?.links && { links: options.links }),
     ...(options?.jsonapi && { jsonapi: options.jsonapi }),

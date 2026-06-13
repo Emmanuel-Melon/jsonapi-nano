@@ -1,40 +1,22 @@
-import type { IncludedResource, ResourceConfig } from "./types";
+import type { IncludedResource, RelationshipObject } from "./types";
+import { formatSingle } from "./serializer";
 
-export function formatSingle<
-  T extends { id: string | number },
-  Context = unknown,
->(
-  item: T,
-  resource: {
-    type: string;
-    attributes: (item: T, ctx: Context | undefined) => Record<string, unknown>;
-    meta?: (item: T, ctx: Context | undefined) => Record<string, unknown>;
-    links?: (
-      item: T,
-      ctx: Context | undefined,
-    ) => Record<string, string | undefined>;
-    relationships?: ResourceConfig<T, Context>["relationships"];
-  },
-  context: Context | undefined,
-) {
-  if (item.id === null || item.id === undefined) {
-    throw new Error("jsonapi-nano: resource item is missing an `id`");
-  }
+export function applyFieldset<T extends Record<string, unknown>>(
+  obj: T | undefined,
+  type: string,
+  fields?: Record<string, string[]>,
+): T | undefined {
+  if (!obj || !fields || !fields[type]) return obj;
 
-  return {
-    type: resource.type,
-    id: String(item.id),
-    attributes: resource.attributes(item, context),
-    ...(resource.relationships && {
-      relationships: resource.relationships(item, context),
-    }),
-    ...(resource.meta && { meta: resource.meta(item, context) }),
-    ...(resource.links && { links: resource.links(item, context) }),
-  };
+  const allowed = new Set(fields[type]);
+  return Object.fromEntries(
+    Object.entries(obj).filter(([key]) => allowed.has(key)),
+  ) as T;
 }
 
 export function dedupeIncluded(
   included: IncludedResource[],
+  fields?: Record<string, string[]>,
 ): IncludedResource[] {
   const seen = new Map<string, IncludedResource>();
   for (const res of included) {
@@ -43,5 +25,46 @@ export function dedupeIncluded(
   return Array.from(seen.values()).map((r) => ({
     ...r,
     id: String(r.id),
+    ...(r.attributes && {
+      attributes: applyFieldset(r.attributes, r.type, fields),
+    }),
   }));
+}
+
+export function resolveIncluded<Context = unknown>(
+  primaryData: Array<{ relationships?: Record<string, RelationshipObject> }>,
+  include: Record<string, [Array<{ id: string | number }>, any]>,
+  context: Context | undefined,
+  fields?: Record<string, string[]>,
+): IncludedResource[] {
+  const result: IncludedResource[] = [];
+  const seen = new Set<string>();
+
+  for (const [relName, [dataset, resource]] of Object.entries(include)) {
+    // Composite Key tracking prevents cross-type ID matching collisions
+    const wantedCompositeKeys = new Set<string>();
+
+    for (const item of primaryData) {
+      const rel = item.relationships?.[relName];
+      if (!rel?.data) continue;
+
+      const refs = Array.isArray(rel.data) ? rel.data : [rel.data];
+      for (const ref of refs) {
+        wantedCompositeKeys.add(`${ref.type}:${ref.id}`);
+      }
+    }
+
+    for (const entity of dataset) {
+      const compositeKey = `${resource.type}:${entity.id}`;
+      if (!wantedCompositeKeys.has(compositeKey) || seen.has(compositeKey))
+        continue;
+
+      seen.add(compositeKey);
+
+      const formatted = formatSingle(entity, resource, context, fields);
+      result.push(formatted as IncludedResource);
+    }
+  }
+
+  return result;
 }
