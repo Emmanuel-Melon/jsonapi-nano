@@ -1,0 +1,9 @@
+{
+  "version": "v1",
+  "packages": {
+    "@emelon/jsonapi-nano": {
+      "signature": "0ad38f63d8005e579d99dfe66c9f442a",
+      "file": true
+    }
+  }
+}

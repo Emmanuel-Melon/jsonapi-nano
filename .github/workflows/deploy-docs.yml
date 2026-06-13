@@ -35,7 +35,7 @@ jobs:
         run: |
           cd docs
           npm ci
-      
+
       - name: Build 11ty Site
         run: |
           cd docs
